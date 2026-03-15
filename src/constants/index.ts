@@ -2,5 +2,5 @@
  * Central export of all constants
  */
 
-export * from './models'
-export * from './apiDefaults'
+export * from "./models";
+export * from "./apiDefaults";

@@ -3,10 +3,10 @@
  * Handles persistence of conversation history
  */
 
-import type { Conversation, ConversationMetadata } from '../../types/chat'
+import type { Conversation, ConversationMetadata } from "../../types/chat";
 
-const STORAGE_KEY = 'ai-chatroom-conversations'
-const METADATA_STORAGE_KEY = 'ai-chatroom-metadata'
+const STORAGE_KEY = "ai-chatroom-conversations";
+const METADATA_STORAGE_KEY = "ai-chatroom-metadata";
 
 export class ConversationStorage {
   /**
@@ -14,20 +14,20 @@ export class ConversationStorage {
    */
   static saveConversation(conversation: Conversation): void {
     try {
-      const conversations = this.getAllConversations()
-      const index = conversations.findIndex((c) => c.id === conversation.id)
+      const conversations = this.getAllConversations();
+      const index = conversations.findIndex((c) => c.id === conversation.id);
 
       if (index >= 0) {
-        conversations[index] = conversation
+        conversations[index] = conversation;
       } else {
-        conversations.push(conversation)
+        conversations.push(conversation);
       }
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations))
-      this.updateMetadata(conversation)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+      this.updateMetadata(conversation);
     } catch (error) {
-      console.error('Error saving conversation:', error)
-      throw new Error('Failed to save conversation')
+      console.error("Error saving conversation:", error);
+      throw new Error("Failed to save conversation");
     }
   }
 
@@ -36,11 +36,11 @@ export class ConversationStorage {
    */
   static getConversation(id: string): Conversation | null {
     try {
-      const conversations = this.getAllConversations()
-      return conversations.find((c) => c.id === id) || null
+      const conversations = this.getAllConversations();
+      return conversations.find((c) => c.id === id) || null;
     } catch (error) {
-      console.error('Error getting conversation:', error)
-      return null
+      console.error("Error getting conversation:", error);
+      return null;
     }
   }
 
@@ -49,11 +49,11 @@ export class ConversationStorage {
    */
   static getAllConversations(): Conversation[] {
     try {
-      const data = localStorage.getItem(STORAGE_KEY)
-      return data ? JSON.parse(data) : []
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Error parsing conversations:', error)
-      return []
+      console.error("Error parsing conversations:", error);
+      return [];
     }
   }
 
@@ -62,11 +62,11 @@ export class ConversationStorage {
    */
   static getConversationMetadata(): ConversationMetadata[] {
     try {
-      const data = localStorage.getItem(METADATA_STORAGE_KEY)
-      return data ? JSON.parse(data) : []
+      const data = localStorage.getItem(METADATA_STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Error getting conversation metadata:', error)
-      return []
+      console.error("Error getting conversation metadata:", error);
+      return [];
     }
   }
 
@@ -75,16 +75,19 @@ export class ConversationStorage {
    */
   static deleteConversation(id: string): void {
     try {
-      const conversations = this.getAllConversations()
-      const filtered = conversations.filter((c) => c.id !== id)
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered))
+      const conversations = this.getAllConversations();
+      const filtered = conversations.filter((c) => c.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 
-      const metadata = this.getConversationMetadata()
-      const filteredMetadata = metadata.filter((m) => m.id !== id)
-      localStorage.setItem(METADATA_STORAGE_KEY, JSON.stringify(filteredMetadata))
+      const metadata = this.getConversationMetadata();
+      const filteredMetadata = metadata.filter((m) => m.id !== id);
+      localStorage.setItem(
+        METADATA_STORAGE_KEY,
+        JSON.stringify(filteredMetadata),
+      );
     } catch (error) {
-      console.error('Error deleting conversation:', error)
-      throw new Error('Failed to delete conversation')
+      console.error("Error deleting conversation:", error);
+      throw new Error("Failed to delete conversation");
     }
   }
 
@@ -93,28 +96,32 @@ export class ConversationStorage {
    */
   static clearAllConversations(): void {
     try {
-      localStorage.removeItem(STORAGE_KEY)
-      localStorage.removeItem(METADATA_STORAGE_KEY)
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(METADATA_STORAGE_KEY);
     } catch (error) {
-      console.error('Error clearing conversations:', error)
-      throw new Error('Failed to clear conversations')
+      console.error("Error clearing conversations:", error);
+      throw new Error("Failed to clear conversations");
     }
   }
 
   /**
    * Get storage statistics
    */
-  static getStorageStats(): { conversations: number; totalMessages: number; totalTokens: number } {
-    const conversations = this.getAllConversations()
-    let totalMessages = 0
-    let totalTokens = 0
+  static getStorageStats(): {
+    conversations: number;
+    totalMessages: number;
+    totalTokens: number;
+  } {
+    const conversations = this.getAllConversations();
+    let totalMessages = 0;
+    let totalTokens = 0;
 
     conversations.forEach((conv) => {
-      totalMessages += conv.messages.length
-      totalTokens += conv.totalTokens || 0
-    })
+      totalMessages += conv.messages.length;
+      totalTokens += conv.totalTokens || 0;
+    });
 
-    return { conversations: conversations.length, totalMessages, totalTokens }
+    return { conversations: conversations.length, totalMessages, totalTokens };
   }
 
   /**
@@ -128,17 +135,17 @@ export class ConversationStorage {
       updatedAt: conversation.updatedAt,
       messageCount: conversation.messages.length,
       totalTokens: conversation.totalTokens || 0,
-    }
+    };
 
-    const allMetadata = this.getConversationMetadata()
-    const index = allMetadata.findIndex((m) => m.id === metadata.id)
+    const allMetadata = this.getConversationMetadata();
+    const index = allMetadata.findIndex((m) => m.id === metadata.id);
 
     if (index >= 0) {
-      allMetadata[index] = metadata
+      allMetadata[index] = metadata;
     } else {
-      allMetadata.push(metadata)
+      allMetadata.push(metadata);
     }
 
-    localStorage.setItem(METADATA_STORAGE_KEY, JSON.stringify(allMetadata))
+    localStorage.setItem(METADATA_STORAGE_KEY, JSON.stringify(allMetadata));
   }
 }

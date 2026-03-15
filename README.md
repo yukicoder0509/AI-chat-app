@@ -151,6 +151,7 @@ MIT
 ## Support & Documentation
 
 For more details, see:
+
 - [Implementation Plan](specs/001-custom-llm-chat/plan.md)
 - [Feature Specification](specs/001-custom-llm-chat/spec.md)
 - [Implementation Tasks](TASKS.md)
