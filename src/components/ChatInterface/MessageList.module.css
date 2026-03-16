@@ -1,0 +1,165 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-secondary);
+  text-align: center;
+
+  p {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+}
+
+.messageList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.messageGroup {
+  display: flex;
+  animation: slideIn 0.3s ease;
+
+  &.user {
+    justify-content: flex-end;
+
+    .messageContent {
+      background: var(--color-primary);
+      color: white;
+      border-radius: 12px 12px 4px 12px;
+    }
+  }
+
+  &.assistant {
+    justify-content: flex-start;
+
+    .messageContent {
+      background: var(--color-message-bg);
+      color: var(--color-text);
+      border-radius: 12px 12px 12px 4px;
+    }
+  }
+
+  &.system {
+    justify-content: center;
+
+    .messageContent {
+      background: transparent;
+      color: var(--color-text-secondary);
+      font-style: italic;
+      font-size: 0.875rem;
+      max-width: 80%;
+      text-align: center;
+    }
+  }
+}
+
+.messageContent {
+  max-width: 70%;
+  padding: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.messageHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+.role {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.streaming {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  font-weight: 600;
+  animation: blink 1s infinite;
+}
+
+.messageText {
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.loadingIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+
+  p {
+    margin: 0;
+  }
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 768px) {
+  .messageContent {
+    max-width: 85%;
+  }
+
+  .messageList {
+    padding: 1rem;
+    gap: 1rem;
+  }
+}

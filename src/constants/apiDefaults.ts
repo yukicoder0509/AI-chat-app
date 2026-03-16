@@ -2,51 +2,62 @@
  * Default API parameters and configuration values
  */
 
+// Parameter range configurations
+export const TEMPERATURE = {
+  default: 0.7,
+  min: 0,
+  max: 2,
+  step: 0.1,
+  label: "Temperature",
+  description:
+    "Controls randomness. Higher values (closer to 2) make output more random, while lower values (closer to 0) make output more focused.",
+};
+
+export const MAX_TOKENS = {
+  default: 2000,
+  min: 1,
+  max: 4000,
+  step: 100,
+  label: "Max Tokens",
+  description: "Maximum number of tokens in the response.",
+};
+
+export const TOP_P = {
+  default: 1,
+  min: 0,
+  max: 1,
+  step: 0.05,
+  label: "Top P",
+  description:
+    "Controls diversity via nucleus sampling. Values closer to 1 are more diverse, values closer to 0 are more focused.",
+};
+
+export const FREQUENCY_PENALTY = {
+  default: 0,
+  min: -2,
+  max: 2,
+  step: 0.1,
+  label: "Frequency Penalty",
+  description:
+    "Reduces the model's likelihood to repeat the same line verbatim. Range: -2.0 to 2.0.",
+};
+
+export const PRESENCE_PENALTY = {
+  default: 0,
+  min: -2,
+  max: 2,
+  step: 0.1,
+  label: "Presence Penalty",
+  description:
+    "Increases the model's likelihood to talk about new topics. Range: -2.0 to 2.0.",
+};
+
 export const API_DEFAULTS = {
-  temperature: {
-    default: 0.7,
-    min: 0,
-    max: 2,
-    step: 0.1,
-    label: "Temperature",
-    description:
-      "Controls randomness. Higher values (closer to 2) make output more random, while lower values (closer to 0) make output more focused.",
-  },
-  maxTokens: {
-    default: 2000,
-    min: 1,
-    max: 4000,
-    step: 100,
-    label: "Max Tokens",
-    description: "Maximum number of tokens in the response.",
-  },
-  topP: {
-    default: 1,
-    min: 0,
-    max: 1,
-    step: 0.05,
-    label: "Top P",
-    description:
-      "Controls diversity via nucleus sampling. Values closer to 1 are more diverse, values closer to 0 are more focused.",
-  },
-  frequencyPenalty: {
-    default: 0,
-    min: -2,
-    max: 2,
-    step: 0.1,
-    label: "Frequency Penalty",
-    description:
-      "Reduces the model's likelihood to repeat the same line verbatim. Range: -2.0 to 2.0.",
-  },
-  presencePenalty: {
-    default: 0,
-    min: -2,
-    max: 2,
-    step: 0.1,
-    label: "Presence Penalty",
-    description:
-      "Increases the model's likelihood to talk about new topics. Range: -2.0 to 2.0.",
-  },
+  temperature: TEMPERATURE,
+  maxTokens: MAX_TOKENS,
+  topP: TOP_P,
+  frequencyPenalty: FREQUENCY_PENALTY,
+  presencePenalty: PRESENCE_PENALTY,
 };
 
 export const SYSTEM_PROMPT_TEMPLATES = {
