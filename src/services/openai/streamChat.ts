@@ -30,8 +30,19 @@ export async function streamChat(
     presencePenalty?: number;
   },
   callbacks: StreamOptions,
+  credentials?: {
+    apiKey: string;
+    apiUrl: string;
+  },
 ): Promise<string> {
-  const client = getOpenAIClient();
+  const client = getOpenAIClient(
+    credentials
+      ? {
+          apiKey: credentials.apiKey,
+          apiUrl: credentials.apiUrl,
+        }
+      : undefined,
+  );
 
   let fullMessage = "";
   callbacks.onStart?.();

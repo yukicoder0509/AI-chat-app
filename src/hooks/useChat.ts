@@ -13,7 +13,24 @@ import type { Message, Conversation } from "../types/chat";
  * Hook for chat operations
  */
 export const useChat = () => {
-  const chatState = useChatStore();
+  const {
+    conversations,
+    currentConversation,
+    isStreamingResponse: isStreaming,
+    currentStreamingChunk: streamingContent,
+    addMessage,
+    updateLastMessage,
+    startStreaming,
+    appendStreamingChunk,
+    finishStreaming,
+    createConversation,
+    getConversation,
+    updateConversation,
+    deleteConversation,
+    setCurrentConversation,
+    clear,
+  } = useChatStore();
+
   const appState = useAppStore();
 
   /**
@@ -21,99 +38,141 @@ export const useChat = () => {
    */
   const sendMessage = useCallback(
     async (content: string) => {
-      const conv = chatState.currentConversation;
-      if (!conv) {
-        appState.setError("No conversation selected");
-        return;
-      }
-
-      // Create user message
-      const userMessage: Message = {
-        id: `msg-${Date.now()}`,
-        role: "user",
-        content,
-        timestamp: Date.now(),
-      };
-
-      // Add user message to conversation
-      chatState.addMessage(conv.id, userMessage);
-
-      // Create assistant message placeholder
-      const assistantMessage: Message = {
-        id: `msg-${Date.now()}-assistant`,
-        role: "assistant",
-        content: "",
-        timestamp: Date.now(),
-      };
-
-      chatState.addMessage(conv.id, assistantMessage);
-
-      // Prepare messages for API
-      const messages = [
-        ...(conv.systemPrompt
-          ? [{ role: "system" as const, content: conv.systemPrompt }]
-          : []),
-        ...conv.messages.map((msg) => ({
-          role: msg.role as "user" | "assistant" | "system",
-          content: msg.content,
-        })),
-      ];
-
       try {
-        // Initialize streaming
-        chatState.startStreaming();
-        appState.setError(null);
+        const conv = currentConversation;
+        if (!conv) {
+          appState.setError("No conversation selected");
+          return;
+        }
 
-        // Get OpenAI API key and validate
-        const apiKey = appState.settings.apiKey;
+        // Safely get settings
+        const settings = appState.settings;
+        if (!settings) {
+          appState.setError("Settings not initialized");
+          return;
+        }
+
+        const apiKey = settings.apiKey;
+        const apiUrl = settings.apiUrl;
 
         if (!apiKey) {
-          throw new Error("API key not configured");
+          appState.setError("API key not configured");
+          return;
         }
 
-        // Stream the response
-        await streamChat(
-          messages,
-          {
-            model: conv.model,
-            temperature: appState.apiConfig.temperature,
-            maxTokens: appState.apiConfig.maxTokens,
-            topP: appState.apiConfig.topP,
-            frequencyPenalty: appState.apiConfig.frequencyPenalty,
-            presencePenalty: appState.apiConfig.presencePenalty,
-          },
-          {
-            onChunk: (chunk: string) => {
-              chatState.appendStreamingChunk(chunk);
-            },
-            onComplete: (fullContent: string) => {
-              chatState.updateLastMessage(conv.id, fullContent);
-              chatState.finishStreaming();
-            },
-            onError: (error: Error) => {
-              appState.setError(error.message);
-              chatState.finishStreaming();
-            },
-          },
-        );
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to send message";
-        appState.setError(message);
-        chatState.finishStreaming();
+        if (!apiUrl) {
+          appState.setError("API URL not configured");
+          return;
+        }
 
-        // Remove the assistant message if there was an error
-        const updated = chatState.currentConversation;
-        if (updated && updated.messages.length > 0) {
-          const lastMsg = updated.messages[updated.messages.length - 1];
-          if (lastMsg.role === "assistant" && lastMsg.content === "") {
-            updated.messages = updated.messages.slice(0, -1);
-            chatState.updateConversation(updated);
+        // Create user message
+        const userMessage: Message = {
+          id: `msg-${Date.now()}`,
+          role: "user",
+          content,
+          timestamp: Date.now(),
+        };
+
+        // Add user message to conversation
+        addMessage(conv.id, userMessage);
+
+        // Create assistant message placeholder
+        const assistantMessage: Message = {
+          id: `msg-${Date.now()}-assistant`,
+          role: "assistant",
+          content: "",
+          timestamp: Date.now(),
+        };
+
+        addMessage(conv.id, assistantMessage);
+
+        // Get updated conversation with the new messages
+        const updatedConv = getConversation(conv.id);
+        if (!updatedConv) {
+          appState.setError("Failed to retrieve conversation");
+          finishStreaming();
+          return;
+        }
+
+        // Prepare messages for API (excluding the last assistant placeholder)
+        const messages = [
+          ...(updatedConv.systemPrompt
+            ? [{ role: "system" as const, content: updatedConv.systemPrompt }]
+            : []),
+          ...updatedConv.messages
+            .slice(0, -1) // Exclude the empty assistant message
+            .map((msg) => ({
+              role: msg.role as "user" | "assistant" | "system",
+              content: msg.content,
+            })),
+        ];
+
+        try {
+          // Initialize streaming
+          startStreaming();
+          appState.setError(null);
+
+          // Stream the response
+          await streamChat(
+            messages,
+            {
+              model: conv.model,
+              temperature: appState.apiConfig.temperature,
+              maxTokens: appState.apiConfig.maxTokens,
+              topP: appState.apiConfig.topP,
+              frequencyPenalty: appState.apiConfig.frequencyPenalty,
+              presencePenalty: appState.apiConfig.presencePenalty,
+            },
+            {
+              onChunk: (chunk: string) => {
+                appendStreamingChunk(chunk);
+              },
+              onComplete: (fullContent: string) => {
+                updateLastMessage(conv.id, fullContent);
+                finishStreaming();
+              },
+              onError: (error: Error) => {
+                appState.setError(error.message);
+                finishStreaming();
+              },
+            },
+            {
+              apiKey: apiKey,
+              apiUrl: apiUrl,
+            },
+          );
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "Failed to send message";
+          appState.setError(message);
+          finishStreaming();
+
+          // Remove the assistant message if there was an error
+          const errorConv = getConversation(conv.id);
+          if (errorConv && errorConv.messages.length > 0) {
+            const lastMsg = errorConv.messages[errorConv.messages.length - 1];
+            if (lastMsg.role === "assistant" && lastMsg.content === "") {
+              errorConv.messages = errorConv.messages.slice(0, -1);
+              updateConversation(errorConv);
+            }
           }
         }
+      } catch (error) {
+        console.error("Unexpected error in sendMessage:", error);
+        appState.setError("An unexpected error occurred");
       }
     },
-    [chatState, appState],
+    [
+      appState,
+      currentConversation,
+      addMessage,
+      startStreaming,
+      appendStreamingChunk,
+      finishStreaming,
+      updateLastMessage,
+      updateConversation,
+      getConversation,
+    ],
   );
 
   /**
@@ -127,72 +186,64 @@ export const useChat = () => {
       const defaultPrompt = systemPrompt || appState.settings.systemPrompt;
       const model = appState.settings.selectedModel;
 
-      return chatState.createConversation(defaultTitle, defaultPrompt, model);
+      return createConversation(defaultTitle, defaultPrompt, model);
     },
-    [chatState, appState],
+    [createConversation, appState],
   );
-
-  /**
-   * Get current conversation
-   */
-  const getCurrentConversation = useCallback(() => {
-    return chatState.currentConversation;
-  }, [chatState]);
 
   /**
    * Switch to a different conversation
    */
   const switchConversation = useCallback(
     (id: string) => {
-      chatState.setCurrentConversation(id);
+      setCurrentConversation(id);
     },
-    [chatState],
+    [setCurrentConversation],
   );
 
   /**
    * Delete a conversation
    */
-  const deleteConversation = useCallback(
+  const deleteConversation_ = useCallback(
     (id: string) => {
-      chatState.deleteConversation(id);
+      deleteConversation(id);
     },
-    [chatState],
+    [deleteConversation],
   );
 
   /**
    * Clear all conversations
    */
   const clearAllConversations = useCallback(() => {
-    chatState.clear();
-  }, [chatState]);
+    clear();
+  }, [clear]);
 
   /**
    * Update conversation settings
    */
   const updateConversationSettings = useCallback(
     (id: string, settings: Partial<Conversation>) => {
-      const conv = chatState.getConversation(id);
+      const conv = getConversation(id);
       if (conv) {
         const updated = { ...conv, ...settings, id: conv.id };
-        chatState.updateConversation(updated);
+        updateConversation(updated);
       }
     },
-    [chatState],
+    [getConversation, updateConversation],
   );
 
   return {
     // State
-    currentConversation: chatState.currentConversation,
-    conversations: chatState.conversations,
-    isStreaming: chatState.isStreamingResponse,
-    streamingContent: chatState.currentStreamingChunk,
+    currentConversation: currentConversation,
+    conversations: conversations,
+    isStreaming: isStreaming,
+    streamingContent: streamingContent,
 
     // Actions
     sendMessage,
     startNewConversation,
-    getCurrentConversation,
     switchConversation,
-    deleteConversation,
+    deleteConversation: deleteConversation_,
     clearAllConversations,
     updateConversationSettings,
   };

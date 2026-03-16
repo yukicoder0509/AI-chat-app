@@ -48,7 +48,7 @@ export const DEFAULT_API_CONFIG: ApiConfig = {
 };
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
-  selectedModel: "gpt-3.5-turbo",
+  selectedModel: "qwen35-4b",
   systemPrompt:
     "You are a helpful, harmless, and honest assistant. Help the user with their questions.",
   apiUrl: import.meta.env.VITE_LLM_API_URL || "http://localhost:8000",
