@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useChat, useSettings } from "../hooks";
-import { ChatInterface, Sidebar, SettingsPanel } from "../components";
+import { ChatInterface, Sidebar, SettingsPanel, Toast } from "../components";
 import { MainLayout } from "./layout/MainLayout";
+import { useAppStore } from "./store";
 import styles from "./App.module.css";
 
 /**
@@ -11,6 +12,7 @@ export const App = () => {
   const [showSettings, setShowSettings] = useState(false);
   const chat = useChat();
   const settings = useSettings();
+  const { error, setError } = useAppStore();
 
   // Initialize first conversation if none exists
   useEffect(() => {
@@ -84,6 +86,16 @@ export const App = () => {
       />
 
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+
+      {error && (
+        <Toast
+          message={error}
+          host={(() => {
+            try { return new URL(settings.apiUrl).host; } catch { return settings.apiUrl; }
+          })()}
+          onClose={() => setError(null)}
+        />
+      )}
     </div>
   );
 };
