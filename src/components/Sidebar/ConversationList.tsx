@@ -1,3 +1,4 @@
+import { Plus, Trash2 } from "lucide-react";
 import type { Conversation } from "../../types/chat";
 import { formatTimestamp, createMessageSummary } from "../../utils";
 import { Button } from "../Common";
@@ -29,6 +30,7 @@ export const ConversationList = ({
         onClick={onNewConversation}
         className={styles.newButton}
       >
+        <Plus size={16} />
         New Chat
       </Button>
 
@@ -68,7 +70,7 @@ export const ConversationList = ({
                 }}
                 title="Delete conversation"
               >
-                ✕
+                <Trash2 size={13} />
               </button>
             </div>
           );

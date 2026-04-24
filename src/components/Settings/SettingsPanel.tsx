@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 import { Button, Input } from "../Common";
 import { ModelSelector } from "./ModelSelector";
 import { SystemPromptEditor } from "./SystemPromptEditor";
@@ -28,7 +29,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
         <div className={styles.header}>
           <h2>Settings</h2>
           <button className={styles.closeButton} onClick={onClose}>
-            ✕
+            <X size={18} />
           </button>
         </div>
 
@@ -48,46 +49,42 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
         </div>
 
         <div className={styles.content}>
-          {activeTab === "general" && (
-            <div className={styles.section}>
-              <Input
-                label="API Key"
-                type="password"
-                value={settings.apiKey}
-                onChange={(e) => handleApiKeyChange(e.target.value)}
-                placeholder="sk-..."
-                fullWidth
-              />
+          <div className={`${styles.section} ${activeTab !== "general" ? styles.sectionHidden : ""}`}>
+            <Input
+              label="API Key"
+              type="password"
+              value={settings.apiKey}
+              onChange={(e) => handleApiKeyChange(e.target.value)}
+              placeholder="sk-..."
+              fullWidth
+            />
 
-              <Input
-                label="API URL"
-                type="url"
-                value={settings.apiUrl}
-                onChange={(e) => handleApiUrlChange(e.target.value)}
-                placeholder="https://..."
-                fullWidth
-              />
+            <Input
+              label="API URL"
+              type="url"
+              value={settings.apiUrl}
+              onChange={(e) => handleApiUrlChange(e.target.value)}
+              placeholder="https://..."
+              fullWidth
+            />
 
-              <ModelSelector
-                selectedModel={settings.selectedModel}
-                onChange={(model) => settings.setSelectedModel(model)}
-              />
+            <ModelSelector
+              selectedModel={settings.selectedModel}
+              onChange={(model) => settings.setSelectedModel(model)}
+            />
 
-              <SystemPromptEditor
-                value={settings.systemPrompt}
-                onChange={(prompt) => settings.setSystemPrompt(prompt)}
-              />
-            </div>
-          )}
+            <SystemPromptEditor
+              value={settings.systemPrompt}
+              onChange={(prompt) => settings.setSystemPrompt(prompt)}
+            />
+          </div>
 
-          {activeTab === "api" && (
-            <div className={styles.section}>
-              <ApiParametersEditor
-                config={settings.apiConfig}
-                onChange={(config) => settings.updateApiConfig(config)}
-              />
-            </div>
-          )}
+          <div className={`${styles.section} ${activeTab !== "api" ? styles.sectionHidden : ""}`}>
+            <ApiParametersEditor
+              config={settings.apiConfig}
+              onChange={(config) => settings.updateApiConfig(config)}
+            />
+          </div>
         </div>
 
         <div className={styles.footer}>

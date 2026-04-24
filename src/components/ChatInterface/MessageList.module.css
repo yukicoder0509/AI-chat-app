@@ -14,7 +14,7 @@
   text-align: center;
 
   p {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     margin: 0;
   }
 }
@@ -22,14 +22,14 @@
 .messageList {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 1.5rem;
+  gap: 1.25rem;
+  padding: 1.75rem 1.5rem;
   flex: 1;
 }
 
 .messageGroup {
   display: flex;
-  animation: slideIn 0.3s ease;
+  animation: slideIn 0.2s ease;
 
   &.user {
     justify-content: flex-end;
@@ -37,7 +37,31 @@
     .messageContent {
       background: var(--color-primary);
       color: white;
-      border-radius: 12px 12px 4px 12px;
+      border-radius: 18px 18px 4px 18px;
+      box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
+    }
+
+    .messageHeader {
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    .messageText code {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    .messageText pre {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .messageText blockquote {
+      border-left-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .messageText th,
+    .messageText td {
+      border-color: rgba(255, 255, 255, 0.2);
     }
   }
 
@@ -47,7 +71,8 @@
     .messageContent {
       background: var(--color-message-bg);
       color: var(--color-text);
-      border-radius: 12px 12px 12px 4px;
+      border-radius: 4px 18px 18px 18px;
+      border: 1px solid var(--color-border);
     }
   }
 
@@ -58,16 +83,17 @@
       background: transparent;
       color: var(--color-text-secondary);
       font-style: italic;
-      font-size: 0.875rem;
-      max-width: 80%;
+      font-size: 0.8rem;
+      max-width: 75%;
       text-align: center;
+      padding: 0.4rem 0;
     }
   }
 }
 
 .messageContent {
-  max-width: 70%;
-  padding: 1rem;
+  max-width: 72%;
+  padding: 0.75rem 1rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -75,31 +101,35 @@
 .messageHeader {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
-  opacity: 0.8;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.72rem;
+  opacity: 0.85;
 }
 
 .role {
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .timestamp {
-  font-size: 0.75rem;
-  opacity: 0.7;
+  font-size: 0.68rem;
+  opacity: 0.65;
 }
 
 .streaming {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   color: var(--color-primary);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   animation: blink 1s infinite;
 }
 
 .messageText {
-  line-height: 1.6;
+  line-height: 1.65;
+  font-size: 0.9rem;
 
   p {
     margin: 0 0 0.6em;
@@ -109,6 +139,7 @@
   h1, h2, h3, h4, h5, h6 {
     margin: 0.8em 0 0.4em;
     line-height: 1.3;
+    font-weight: 600;
     &:first-child { margin-top: 0; }
   }
 
@@ -117,82 +148,86 @@
     padding-left: 1.4em;
   }
 
-  li { margin: 0.15em 0; }
+  li { margin: 0.2em 0; }
 
   code {
-    font-family: ui-monospace, monospace;
-    font-size: 0.875em;
-    background: rgba(0, 0, 0, 0.15);
-    padding: 0.15em 0.35em;
-    border-radius: 4px;
+    font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+    font-size: 0.82em;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--color-primary);
+    padding: 0.15em 0.4em;
+    border-radius: 5px;
   }
 
   pre {
-    margin: 0.6em 0;
-    padding: 0.85em 1em;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 6px;
+    margin: 0.75em 0;
+    padding: 0.875em 1em;
+    background: var(--color-input-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
     overflow-x: auto;
 
     code {
       background: none;
       padding: 0;
-      font-size: 0.85em;
+      color: var(--color-text);
+      font-size: 0.83em;
     }
   }
 
   blockquote {
     margin: 0.6em 0;
-    padding: 0.2em 0.8em;
-    border-left: 3px solid rgba(255, 255, 255, 0.4);
+    padding: 0.3em 0.875em;
+    border-left: 3px solid rgba(var(--color-primary-rgb), 0.4);
     opacity: 0.85;
   }
 
   table {
     border-collapse: collapse;
-    margin: 0.6em 0;
+    margin: 0.75em 0;
     width: 100%;
-    font-size: 0.9em;
+    font-size: 0.875em;
   }
 
   th, td {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.35em 0.65em;
+    border: 1px solid var(--color-border);
+    padding: 0.4em 0.75em;
     text-align: left;
   }
 
-  th { font-weight: 600; }
+  th { font-weight: 600; background: rgba(var(--color-primary-rgb), 0.06); }
 
   a {
-    color: inherit;
-    text-decoration: underline;
-    opacity: 0.9;
+    color: var(--color-primary);
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
   }
 
   hr {
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    margin: 0.8em 0;
+    border-top: 1px solid var(--color-border);
+    margin: 0.875em 0;
   }
+
+  strong { font-weight: 600; }
 }
 
 .loadingIndicator {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  padding: 2rem;
+  gap: 0.75rem;
+  padding: 1.5rem;
   color: var(--color-text-secondary);
+  font-size: 0.875rem;
 
-  p {
-    margin: 0;
-  }
+  p { margin: 0; }
 }
 
 .spinner {
-  width: 2rem;
-  height: 2rem;
-  border: 3px solid var(--color-border);
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--color-border);
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -201,7 +236,7 @@
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -210,25 +245,17 @@
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes blink {
-  0%,
-  49% {
-    opacity: 1;
-  }
-  50%,
-  100% {
-    opacity: 0.5;
-  }
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.4; }
 }
 
 @media (max-width: 768px) {
   .messageContent {
-    max-width: 85%;
+    max-width: 88%;
   }
 
   .messageList {

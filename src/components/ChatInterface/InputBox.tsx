@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { Button } from "../Common";
+import { ArrowUp, Loader2 } from "lucide-react";
 import styles from "./InputBox.module.css";
 
 export interface InputBoxProps {
@@ -72,16 +72,14 @@ export const InputBox = ({
           disabled={isLoading || disabled}
           rows={1}
         />
-        <Button
-          variant="primary"
-          size="medium"
+        <button
+          className={styles.sendButton}
           onClick={handleSendMessage}
           disabled={!message.trim() || isLoading || disabled}
-          loading={isLoading}
-          className={styles.sendButton}
+          title="Send message"
         >
-          Send
-        </Button>
+          {isLoading ? <Loader2 size={16} className={styles.spinIcon} /> : <ArrowUp size={16} />}
+        </button>
       </div>
       <p className={styles.hint}>Press Ctrl+Enter to send</p>
     </div>

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { X } from "lucide-react";
 import styles from "./Toast.module.css";
 
 interface ToastProps {
@@ -21,7 +22,7 @@ export const Toast = ({ message, host, onClose, duration = 5000 }: ToastProps) =
         {host && <span className={styles.host}>{host}</span>}
       </span>
       <button className={styles.close} onClick={onClose} aria-label="Dismiss">
-        ✕
+        <X size={15} />
       </button>
     </div>
   );

@@ -6,27 +6,27 @@
 
 :root {
   /* Colors - Light Mode */
-  --color-background: #ffffff;
-  --color-sidebar-bg: #f8f9fa;
-  --color-message-bg: #f0f0f0;
+  --color-background: #f7f9fc;
+  --color-sidebar-bg: #eef1f8;
+  --color-message-bg: #ffffff;
   --color-input-bg: #ffffff;
-  --color-input-focus-bg: #fafafa;
-  --color-disabled-bg: #efefef;
-  --color-text: #1a1a1a;
-  --color-text-secondary: #666666;
-  --color-border: #e0e0e0;
-  --color-hover: #e8e8e8;
+  --color-input-focus-bg: #fafbff;
+  --color-disabled-bg: #f0f2f7;
+  --color-text: #1a1d2e;
+  --color-text-secondary: #6b7080;
+  --color-border: #dde1ed;
+  --color-hover: #e3e8f5;
 
   /* Primary Colors */
-  --color-primary: #0066cc;
-  --color-primary-hover: #0052a3;
-  --color-primary-rgb: 0, 102, 204;
+  --color-primary: #4f7de8;
+  --color-primary-hover: #3d6dd8;
+  --color-primary-rgb: 79, 125, 232;
 
   /* Button Colors */
-  --color-button-bg: #f0f0f0;
-  --color-button-hover: #e0e0e0;
-  --color-secondary: #e8e8e8;
-  --color-secondary-hover: #d8d8d8;
+  --color-button-bg: #edf0fa;
+  --color-button-hover: #dde3f5;
+  --color-secondary: #edf0fa;
+  --color-secondary-hover: #dde3f5;
 
   /* Alert Colors */
   --color-danger: #d32f2f;
@@ -43,8 +43,8 @@
   --spacing-xl: 32px;
 
   /* Border Radius */
-  --border-radius: 6px;
-  --border-radius-lg: 12px;
+  --border-radius: 8px;
+  --border-radius-lg: 16px;
 
   /* Transitions */
   --transition: all 0.2s ease;
@@ -53,21 +53,25 @@
 @media (prefers-color-scheme: dark) {
   :root {
     /* Colors - Dark Mode */
-    --color-background: #1a1a1a;
-    --color-sidebar-bg: #0f0f0f;
-    --color-message-bg: #2d2d2d;
-    --color-input-bg: #252525;
-    --color-input-focus-bg: #2d2d2d;
-    --color-disabled-bg: #1a1a1a;
-    --color-text: #ffffff;
-    --color-text-secondary: #a0a0a0;
-    --color-border: #404040;
-    --color-hover: #303030;
+    --color-background: #0e1117;
+    --color-sidebar-bg: #090c13;
+    --color-message-bg: #161b27;
+    --color-input-bg: #1c2132;
+    --color-input-focus-bg: #202540;
+    --color-disabled-bg: #111520;
+    --color-text: #c8ccd8;
+    --color-text-secondary: #616880;
+    --color-border: #1e2438;
+    --color-hover: #141928;
 
-    --color-button-bg: #303030;
-    --color-button-hover: #404040;
-    --color-secondary: #303030;
-    --color-secondary-hover: #404040;
+    --color-button-bg: #1c2132;
+    --color-button-hover: #222840;
+    --color-secondary: #1c2132;
+    --color-secondary-hover: #222840;
+
+    --color-primary: #5c8cf0;
+    --color-primary-hover: #4b7be0;
+    --color-primary-rgb: 92, 140, 240;
   }
 }
 
@@ -75,8 +79,8 @@ html,
 body {
   height: 100%;
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-background);
@@ -95,8 +99,8 @@ body {
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -105,14 +109,13 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
-  border-radius: 4px;
+  border-radius: 10px;
 
   &:hover {
     background: var(--color-text-secondary);
   }
 }
 
-/* Firefox scrollbar */
 * {
   scrollbar-color: var(--color-border) transparent;
   scrollbar-width: thin;

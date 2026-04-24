@@ -1,3 +1,4 @@
+import { Settings, BotMessageSquare } from "lucide-react";
 import type { Conversation } from "../../types/chat";
 import { ConversationList } from "./ConversationList";
 import styles from "./Sidebar.module.css";
@@ -25,7 +26,7 @@ export const Sidebar = ({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1>AI Chatroom</h1>
+        <h1><BotMessageSquare size={16} strokeWidth={2.5} />AI Chatroom</h1>
       </div>
 
       <ConversationList
@@ -41,7 +42,8 @@ export const Sidebar = ({
         onClick={onOpenSettings}
         title="Settings"
       >
-        ⚙️
+        <Settings size={16} />
+        Settings
       </button>
     </div>
   );
