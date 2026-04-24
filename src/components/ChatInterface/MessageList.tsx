@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { Message } from "../../types/chat";
 import { formatTimestamp, getRoleLabel } from "../../utils";
 import styles from "./MessageList.module.css";
@@ -49,7 +51,11 @@ export const MessageList = ({
                   {formatTimestamp(message.timestamp, "time")}
                 </span>
               </div>
-              <div className={styles.messageText}>{message.content}</div>
+              <div className={styles.messageText}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {message.content}
+                </ReactMarkdown>
+              </div>
             </div>
           </div>
         ))}
@@ -61,7 +67,11 @@ export const MessageList = ({
                 <span className={styles.role}>Assistant</span>
                 <span className={styles.streaming}>Streaming...</span>
               </div>
-              <div className={styles.messageText}>{streamingContent}</div>
+              <div className={styles.messageText}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {streamingContent}
+                </ReactMarkdown>
+              </div>
             </div>
           </div>
         )}
