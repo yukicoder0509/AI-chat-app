@@ -10,17 +10,20 @@ export interface ChatInterfaceProps {
   streamingContent?: string;
   isStreaming?: boolean;
   isLoading?: boolean;
+  models?: string[];
+  isLoadingModels?: boolean;
+  onModelChange?: (model: string) => void;
 }
 
-/**
- * ChatInterface component - main chat interface container
- */
 export const ChatInterface = ({
   conversation,
   onSendMessage,
   streamingContent = "",
   isStreaming = false,
   isLoading = false,
+  models,
+  isLoadingModels,
+  onModelChange,
 }: ChatInterfaceProps) => {
   const handleSendMessage = useCallback(
     (message: string) => {
@@ -40,11 +43,29 @@ export const ChatInterface = ({
     );
   }
 
+  const modelOptions =
+    models && models.length > 0 ? models : [conversation.model];
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>{conversation.title}</h2>
-        <p className={styles.modelInfo}>{conversation.model}</p>
+        {onModelChange ? (
+          <select
+            className={styles.modelSelect}
+            value={conversation.model}
+            onChange={(e) => onModelChange(e.target.value)}
+            disabled={isStreaming || isLoading || isLoadingModels}
+          >
+            {modelOptions.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p className={styles.modelInfo}>{conversation.model}</p>
+        )}
       </div>
 
       <MessageList

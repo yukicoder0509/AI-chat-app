@@ -48,11 +48,11 @@ export const DEFAULT_API_CONFIG: ApiConfig = {
 };
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
-  selectedModel: "qwen35-4b",
+  selectedModel: "",
   systemPrompt:
     "You are a helpful, harmless, and honest assistant. Help the user with their questions.",
-  apiUrl: import.meta.env.VITE_LLM_API_URL || "http://localhost:8000",
-  apiKey: import.meta.env.VITE_LLM_API_KEY || "",
+  apiUrl: import.meta.env.VITE_LLM_API_URL,
+  apiKey: import.meta.env.VITE_LLM_API_KEY,
   apiConfig: DEFAULT_API_CONFIG,
   theme: "auto",
   autoSave: true,

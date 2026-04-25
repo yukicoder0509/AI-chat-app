@@ -1,15 +1,25 @@
-import { AVAILABLE_MODELS, MODEL_OPTIONS } from "../../constants";
 import styles from "./ModelSelector.module.css";
 
 export interface ModelSelectorProps {
   selectedModel: string;
   onChange: (model: string) => void;
+  models?: string[];
+  isLoadingModels?: boolean;
 }
 
 export const ModelSelector = ({
   selectedModel,
   onChange,
+  models,
+  isLoadingModels,
 }: ModelSelectorProps) => {
+  const options =
+    models && models.length > 0
+      ? models
+      : selectedModel
+        ? [selectedModel]
+        : [];
+
   return (
     <div className={styles.container}>
       <label className={styles.label}>Model</label>
@@ -17,27 +27,20 @@ export const ModelSelector = ({
         value={selectedModel}
         onChange={(e) => onChange(e.target.value)}
         className={styles.select}
+        disabled={isLoadingModels || options.length === 0}
       >
-        {MODEL_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label} ({option.contextWindow.toLocaleString()} tokens)
-          </option>
-        ))}
+        {isLoadingModels ? (
+          <option value="">Loading models…</option>
+        ) : options.length === 0 ? (
+          <option value="">No models available</option>
+        ) : (
+          options.map((id) => (
+            <option key={id} value={id}>
+              {id}
+            </option>
+          ))
+        )}
       </select>
-
-      {selectedModel in AVAILABLE_MODELS && (
-        <div className={styles.info}>
-          <p>
-            <strong>Context:</strong>{" "}
-            {AVAILABLE_MODELS[selectedModel].contextWindow.toLocaleString()}{" "}
-            tokens
-          </p>
-          <p>
-            <strong>Max Output:</strong>{" "}
-            {AVAILABLE_MODELS[selectedModel].maxTokens.toLocaleString()} tokens
-          </p>
-        </div>
-      )}
     </div>
   );
 };

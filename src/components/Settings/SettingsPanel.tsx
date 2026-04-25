@@ -4,7 +4,7 @@ import { Button, Input } from "../Common";
 import { ModelSelector } from "./ModelSelector";
 import { SystemPromptEditor } from "./SystemPromptEditor";
 import { ApiParametersEditor } from "./ApiParametersEditor";
-import { useSettings } from "../../hooks";
+import { useSettings, useModels } from "../../hooks";
 import styles from "./SettingsPanel.module.css";
 
 export interface SettingsPanelProps {
@@ -13,6 +13,7 @@ export interface SettingsPanelProps {
 
 export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
   const settings = useSettings();
+  const { models, isLoadingModels } = useModels();
   const [activeTab, setActiveTab] = useState<"general" | "api">("general");
 
   const handleApiKeyChange = (key: string) => {
@@ -71,6 +72,8 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             <ModelSelector
               selectedModel={settings.selectedModel}
               onChange={(model) => settings.setSelectedModel(model)}
+              models={models}
+              isLoadingModels={isLoadingModels}
             />
 
             <SystemPromptEditor

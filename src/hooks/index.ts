@@ -6,3 +6,4 @@
 export { useChat } from "./useChat";
 export { useSettings } from "./useSettings";
 export { useStreaming } from "./useStreaming";
+export { useModels } from "./useModels";

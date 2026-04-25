@@ -141,6 +141,27 @@ export class OpenAIClient {
   }
 
   /**
+   * Fetch available models from the API
+   */
+  async fetchModels(): Promise<string[]> {
+    const response = await fetch(`${this.apiUrl}/v1/models`, {
+      method: "GET",
+      headers: this.getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new OpenAIError(
+        "Failed to fetch models",
+        response.status,
+        "fetch_models_failed",
+      );
+    }
+
+    const data = (await response.json()) as { data: { id: string }[] };
+    return data.data.map((m) => m.id);
+  }
+
+  /**
    * Test the API connection and key validity
    */
   async testConnection(): Promise<boolean> {
