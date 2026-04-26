@@ -4,25 +4,31 @@ import { Button, Input } from "../Common";
 import { ModelSelector } from "./ModelSelector";
 import { SystemPromptEditor } from "./SystemPromptEditor";
 import { ApiParametersEditor } from "./ApiParametersEditor";
+import { McpSettings } from "./McpSettings";
+import { RoutingRulesEditor } from "./RoutingRulesEditor";
 import { useSettings, useModels } from "../../hooks";
+import { useAppStore } from "../../app/store";
+import type { McpServer } from "../../types/mcp";
+import type { UseToolsReturn } from "../../hooks/useTools";
 import styles from "./SettingsPanel.module.css";
 
 export interface SettingsPanelProps {
   onClose: () => void;
+  onOpenMemoryPanel?: () => void;
+  mcpServers?: McpServer[];
+  mcpActions?: Pick<UseToolsReturn, "addServer" | "updateServer" | "removeServer" | "reconnect">;
 }
 
-export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
+export const SettingsPanel = ({
+  onClose,
+  onOpenMemoryPanel,
+  mcpServers = [],
+  mcpActions,
+}: SettingsPanelProps) => {
   const settings = useSettings();
   const { models, isLoadingModels } = useModels();
-  const [activeTab, setActiveTab] = useState<"general" | "api">("general");
-
-  const handleApiKeyChange = (key: string) => {
-    settings.setApiKey(key);
-  };
-
-  const handleApiUrlChange = (url: string) => {
-    settings.setApiUrl(url);
-  };
+  const { updateSetting } = useAppStore();
+  const [activeTab, setActiveTab] = useState<"general" | "api" | "mcp" | "routing">("general");
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -47,6 +53,18 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
           >
             API
           </button>
+          <button
+            className={`${styles.tab} ${activeTab === "mcp" ? styles.active : ""}`}
+            onClick={() => setActiveTab("mcp")}
+          >
+            MCP
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "routing" ? styles.active : ""}`}
+            onClick={() => setActiveTab("routing")}
+          >
+            Routing
+          </button>
         </div>
 
         <div className={styles.content}>
@@ -55,7 +73,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
               label="API Key"
               type="password"
               value={settings.apiKey}
-              onChange={(e) => handleApiKeyChange(e.target.value)}
+              onChange={(e) => settings.setApiKey(e.target.value)}
               placeholder="sk-..."
               fullWidth
             />
@@ -64,7 +82,7 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
               label="API URL"
               type="url"
               value={settings.apiUrl}
-              onChange={(e) => handleApiUrlChange(e.target.value)}
+              onChange={(e) => settings.setApiUrl(e.target.value)}
               placeholder="https://..."
               fullWidth
             />
@@ -80,6 +98,28 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
               value={settings.systemPrompt}
               onChange={(prompt) => settings.setSystemPrompt(prompt)}
             />
+
+            <div className={styles.toggleRow}>
+              <label className={styles.toggleLabel}>
+                <span>Long-Term Memory</span>
+                <span className={styles.toggleDesc}>Extract and recall facts across conversations</span>
+              </label>
+              <button
+                className={`${styles.toggle} ${settings.settings.memoryEnabled ? styles.toggleOn : ""}`}
+                onClick={() => updateSetting("memoryEnabled", !settings.settings.memoryEnabled)}
+                type="button"
+                role="switch"
+                aria-checked={settings.settings.memoryEnabled}
+              >
+                <span className={styles.toggleThumb} />
+              </button>
+            </div>
+
+            {onOpenMemoryPanel && (
+              <button className={styles.memoryLink} onClick={onOpenMemoryPanel} type="button">
+                Manage Memories →
+              </button>
+            )}
           </div>
 
           <div className={`${styles.section} ${activeTab !== "api" ? styles.sectionHidden : ""}`}>
@@ -87,6 +127,24 @@ export const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
               config={settings.apiConfig}
               onChange={(config) => settings.updateApiConfig(config)}
             />
+          </div>
+
+          <div className={`${styles.section} ${activeTab !== "mcp" ? styles.sectionHidden : ""}`}>
+            {mcpActions ? (
+              <McpSettings
+                servers={mcpServers}
+                onAddServer={mcpActions.addServer}
+                onUpdateServer={mcpActions.updateServer}
+                onRemoveServer={mcpActions.removeServer}
+                onReconnect={mcpActions.reconnect}
+              />
+            ) : (
+              <p className={styles.mcpNote}>MCP actions not available.</p>
+            )}
+          </div>
+
+          <div className={`${styles.section} ${activeTab !== "routing" ? styles.sectionHidden : ""}`}>
+            <RoutingRulesEditor availableModels={models} />
           </div>
         </div>
 

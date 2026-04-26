@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Message } from "../../types/chat";
 import { formatTimestamp, getRoleLabel } from "../../utils";
+import { ToolCallBlock } from "./ToolCallBlock";
 import styles from "./MessageList.module.css";
 
 export interface MessageListProps {
@@ -12,9 +13,6 @@ export interface MessageListProps {
   isLoading?: boolean;
 }
 
-/**
- * MessageList component - displays chat messages
- */
 export const MessageList = ({
   messages,
   streamingContent = "",
@@ -23,21 +21,23 @@ export const MessageList = ({
 }: MessageListProps) => {
   const endRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingContent]);
 
+  // Hide "tool" role messages from display (they're shown via ToolCallBlock)
+  const visibleMessages = messages.filter((m) => m.role !== "tool");
+
   return (
     <div className={styles.container}>
-      {messages.length === 0 && !isStreaming ? (
+      {visibleMessages.length === 0 && !isStreaming ? (
         <div className={styles.empty}>
           <p>No messages yet. Start a conversation!</p>
         </div>
       ) : null}
 
       <div className={styles.messageList}>
-        {messages.map((message) => (
+        {visibleMessages.map((message) => (
           <div
             key={message.id}
             className={`${styles.messageGroup} ${styles[message.role]}`}
@@ -47,15 +47,43 @@ export const MessageList = ({
                 <span className={styles.role}>
                   {getRoleLabel(message.role)}
                 </span>
+                {message.role === "assistant" && message.model && (
+                  <span className={styles.modelBadge}>{message.model}</span>
+                )}
                 <span className={styles.timestamp}>
                   {formatTimestamp(message.timestamp, "time")}
                 </span>
               </div>
-              <div className={styles.messageText}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {message.content}
-                </ReactMarkdown>
-              </div>
+
+              {message.role === "user" && message.attachments && message.attachments.length > 0 && (
+                <div className={styles.attachmentThumbs}>
+                  {message.attachments.map((att) => (
+                    <img
+                      key={att.id}
+                      src={att.base64DataUrl}
+                      alt={att.fileName}
+                      className={styles.attachmentThumb}
+                      title={att.fileName}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {message.role === "assistant" && message.toolCalls && message.toolCalls.length > 0 && (
+                <div className={styles.toolCallList}>
+                  {message.toolCalls.map((tc) => (
+                    <ToolCallBlock key={tc.id} toolCall={tc} />
+                  ))}
+                </div>
+              )}
+
+              {message.content && (
+                <div className={styles.messageText}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
+              )}
             </div>
           </div>
         ))}

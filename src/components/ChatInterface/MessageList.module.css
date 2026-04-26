@@ -118,6 +118,19 @@
   opacity: 0.65;
 }
 
+.modelBadge {
+  font-size: 0.65rem;
+  font-weight: 500;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  opacity: 0.75;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .streaming {
   font-size: 0.68rem;
   color: var(--color-primary);
@@ -210,6 +223,28 @@
   }
 
   strong { font-weight: 600; }
+}
+
+.toolCallList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.attachmentThumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.attachmentThumb {
+  max-height: 200px;
+  max-width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
 }
 
 .loadingIndicator {
