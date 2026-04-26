@@ -1,156 +1,81 @@
 # System Architecture Diagram
 
 ```mermaid
-graph TD
+flowchart TD
     subgraph UI["UI Layer (src/components/)"]
-        direction LR
-        Sidebar["Sidebar\nConversationList"]
-        ChatInterface["ChatInterface\nMessageList · InputBox\nAttachmentPreview · ToolCallBlock"]
-        SettingsPanel["SettingsPanel\nApiParams · ModelSelector\nRoutingRulesEditor · McpSettings"]
+        direction TB
+        Sidebar["Sidebar · ConversationList"]
+        ChatInterface["ChatInterface · MessageList · InputBox · ToolCallBlock"]
+        SettingsPanel["SettingsPanel · API · Model · Routing · MCP"]
         MemoryPanel["MemoryPanel"]
-        Toast["Toast"]
     end
 
-    subgraph App["App Root (src/app/App.tsx)"]
-        AppRoot["App.tsx\nOrchestrates all hooks\nRoutes tool calls\nManages modal state"]
+    App["App.tsx — orchestrates hooks · routes tool calls · manages modals"]
+
+    subgraph Hooks["Hooks (src/hooks/)"]
+        direction TB
+        useChat["useChat — send · stream · tool dispatch · attachments"]
+        useMemory["useMemory — inject memories · extract facts · CRUD"]
+        useTools["useTools — MCP lifecycle · connect · execute"]
+        useRouting["useRouting — auto model selection · task classify"]
+        useModels["useModels — fetch /v1/models"]
+        useSettings["useSettings — settings mutations"]
     end
 
-    subgraph Hooks["Custom Hooks (src/hooks/)"]
-        useChat["useChat\nMessage sending\nStreaming · Tool dispatch\nAttachment processing"]
-        useSettings["useSettings"]
-        useModels["useModels\nFetches model list"]
-        useRouting["useRouting\nAuto model selection"]
-        useMemory["useMemory\nMemory injection\nFact extraction\nMemory tools"]
-        useTools["useTools\nMCP server lifecycle\nTool execution"]
-        useStreaming["useStreaming\nAbortController\nChunk accumulation"]
+    subgraph State["Zustand Stores (src/app/store/)"]
+        direction TB
+        ChatStore["useChatStore — conversations · messages · streaming state"]
+        AppStore["useAppStore — settings · apiConfig · error"]
     end
 
-    subgraph Stores["Zustand Stores (src/app/store/)"]
-        ChatStore["useChatStore\nconversations[]\ncurrentConversation\nstreamingState"]
-        AppStore["useAppStore\nsettings · apiConfig\nloading · error"]
+    subgraph Svc["Services (src/services/)"]
+        direction TB
+        OpenAIClient["OpenAIClient — streamChatCompletion() · fetchModels()"]
+        streamChat["streamChat — SSE parse · tool call accumulation · callbacks"]
+        McpClient["McpClient — JSON-RPC 2.0 · initialize · listTools · callTool"]
+        MemExtractor["memoryExtractor — extractFacts() · LLM call · dedup"]
+        TaskRouter["taskRouter — classifyTask() · inferCapabilities() · selectModel()"]
+        ImageProcessor["imageProcessor — validate · resize · compress · base64"]
     end
 
-    subgraph Services["Services (src/services/)"]
-        subgraph OpenAI["OpenAI / LLM"]
-            OpenAIClient["OpenAIClient\nstreamChatCompletion()\nfetchModels()"]
-            streamChat["streamChat()\nSSE parsing\nTool call accumulation\nonChunk · onToolCalls · onComplete"]
-        end
-        subgraph MCP["MCP Protocol"]
-            McpClient["McpClient\ninitialize()\nlistTools()\ncallTool()\nJSON-RPC 2.0"]
-            McpStorage["mcpStorage\nloadServers()\nsaveServers()"]
-        end
-        subgraph MemSvc["Memory"]
-            MemStorage["memoryStorage\nCRUD for MemoryEntry[]"]
-            MemExtractor["memoryExtractor\nextractFacts()\nLLM-based dedup"]
-        end
-        subgraph Routing["Routing"]
-            TaskRouter["taskRouter\nclassifyTask()\ninferCapabilities()\nselectModel()"]
-            RoutingConfig["routingConfig\nloadRoutingConfig()\nsaveRoutingConfig()"]
-        end
-        subgraph Vision["Vision"]
-            ImageProcessor["imageProcessor\nvalidateImage()\nresizeAndCompress()\ndetectVisionCapability()"]
-        end
-        subgraph Storage["Storage"]
-            ConvStorage["ConversationStorage\nJSON → localStorage"]
-            SettStorage["SettingsStorage\nJSON → localStorage"]
-        end
-        subgraph Export["Export"]
-            ExportSvc["jsonExport\nmarkdownExport"]
-        end
+    subgraph Persist["Persistence (localStorage)"]
+        direction TB
+        LS1["ai-chatroom-conversations"]
+        LS2["ai-chatroom-settings · app-store"]
+        LS3["ai-chatroom-memories"]
+        LS4["ai-chatroom-mcp-servers"]
+        LS5["ai-chatroom-routing-config"]
     end
 
-    subgraph LocalStorage["localStorage (Browser)"]
-        LS_Conv["ai-chatroom-conversations"]
-        LS_Settings["ai-chatroom-settings / app-store"]
-        LS_Memory["ai-chatroom-memories"]
-        LS_Routing["ai-chatroom-routing-config"]
-        LS_MCP["ai-chatroom-mcp-servers"]
+    subgraph Ext["External Services"]
+        direction TB
+        LLM["OpenAI-Compatible API"]
+        MCPSrv["MCP Servers — HTTP endpoints"]
     end
 
-    subgraph External["External Services"]
-        LLM_API["OpenAI-Compatible API\n(configurable URL + key)"]
-        MCP_Servers["MCP Servers\n(user-provided HTTP endpoints)"]
-    end
+    UI --> App
+    App --> Hooks
+    Hooks --> State
+    Hooks --> Svc
+    State --> Persist
+    Svc --> Persist
+    OpenAIClient -->|REST · SSE| LLM
+    MemExtractor -->|LLM call| LLM
+    McpClient -->|JSON-RPC 2.0| MCPSrv
 
-    %% App ↔ UI
-    AppRoot --> Sidebar
-    AppRoot --> ChatInterface
-    AppRoot --> SettingsPanel
-    AppRoot --> MemoryPanel
-    AppRoot --> Toast
+    classDef ui fill:#dbeafe,stroke:#3b82f6,color:#3b82f6
+    classDef hook fill:#dcfce7,stroke:#16a34a,color:#16a34a
+    classDef store fill:#fef9c3,stroke:#ca8a04,color:#ca8a04
+    classDef svc fill:#fce7f3,stroke:#db2777,color:#db2777
+    classDef ls fill:#f3e8ff,stroke:#9333ea,color:#9333ea
+    classDef ext fill:#ffedd5,stroke:#ea580c,color:#ea580c
 
-    %% App ↔ Hooks
-    AppRoot --> useChat
-    AppRoot --> useSettings
-    AppRoot --> useModels
-    AppRoot --> useRouting
-    AppRoot --> useMemory
-    AppRoot --> useTools
-
-    %% Hooks ↔ Stores
-    useChat --> ChatStore
-    useChat --> AppStore
-    useSettings --> AppStore
-    useModels --> AppStore
-    useStreaming --> ChatStore
-
-    %% Hooks ↔ Services
-    useChat --> streamChat
-    useChat --> ImageProcessor
-    useChat --> TaskRouter
-    useChat --> MemStorage
-    useChat --> MemExtractor
-    useModels --> OpenAIClient
-    useRouting --> TaskRouter
-    useRouting --> RoutingConfig
-    useMemory --> MemStorage
-    useMemory --> MemExtractor
-    useTools --> McpClient
-    useTools --> McpStorage
-
-    %% Services internal
-    streamChat --> OpenAIClient
-    TaskRouter --> RoutingConfig
-
-    %% Services ↔ Storage
-    ChatStore --> ConvStorage
-    AppStore --> SettStorage
-    ConvStorage --> LS_Conv
-    SettStorage --> LS_Settings
-    MemStorage --> LS_Memory
-    RoutingConfig --> LS_Routing
-    McpStorage --> LS_MCP
-
-    %% External calls
-    OpenAIClient -->|"REST / SSE"| LLM_API
-    McpClient -->|"JSON-RPC 2.0 / SSE"| MCP_Servers
-    MemExtractor -->|"LLM call for fact extraction"| LLM_API
-
-    %% Data flow annotation
-    subgraph Flow["Message Send Flow"]
-        F1["1 User input + attachment"]
-        F2["2 Resize/compress image"]
-        F3["3 Resolve model (auto routing)"]
-        F4["4 Build API messages + inject memories"]
-        F5["5 Stream to LLM (SSE)"]
-        F6["6 Execute tool calls (MCP / memory)"]
-        F7["7 Extract & store new memory facts"]
-        F1 --> F2 --> F3 --> F4 --> F5 --> F6 --> F7
-    end
-
-    classDef uiClass fill:#dbeafe,stroke:#3b82f6, color:#3b82f6
-    classDef hookClass fill:#dcfce7,stroke:#16a34a, color:#16a34a
-    classDef storeClass fill:#fef9c3,stroke:#ca8a04,color:#ca8a04
-    classDef serviceClass fill:#fce7f3,stroke:#db2777,color:#db2777
-    classDef storageClass fill:#f3e8ff,stroke:#9333ea,color:#9333ea
-    classDef externalClass fill:#ffedd5,stroke:#ea580c,color:#ea580c
-
-    class Sidebar,ChatInterface,SettingsPanel,MemoryPanel,Toast uiClass
-    class useChat,useSettings,useModels,useRouting,useMemory,useTools,useStreaming hookClass
-    class ChatStore,AppStore storeClass
-    class OpenAIClient,streamChat,McpClient,McpStorage,MemStorage,MemExtractor,TaskRouter,RoutingConfig,ImageProcessor,ConvStorage,SettStorage,ExportSvc serviceClass
-    class LS_Conv,LS_Settings,LS_Memory,LS_Routing,LS_MCP storageClass
-    class LLM_API,MCP_Servers externalClass
+    class Sidebar,ChatInterface,SettingsPanel,MemoryPanel ui
+    class useChat,useMemory,useTools,useRouting,useModels,useSettings hook
+    class ChatStore,AppStore store
+    class OpenAIClient,streamChat,McpClient,MemExtractor,TaskRouter,ImageProcessor svc
+    class LS1,LS2,LS3,LS4,LS5 ls
+    class LLM,MCPSrv ext
 ```
 
 ## Layer Reference
