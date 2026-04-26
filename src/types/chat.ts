@@ -2,12 +2,21 @@
  * Chat-related TypeScript types and interfaces
  */
 
+import type { Attachment } from "./attachments";
+import type { ToolCall } from "./mcp";
+import type { RoutingDecision } from "./routing";
+
 export interface Message {
   id: string;
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant" | "system" | "tool";
   content: string;
   timestamp: number;
-  tokens?: number; // Estimated tokens used by this message
+  tokens?: number;
+  model?: string;
+  attachments?: Attachment[];
+  toolCalls?: ToolCall[];
+  toolCallId?: string;
+  routingDecision?: RoutingDecision;
 }
 
 export interface ConversationMetadata {
@@ -30,6 +39,7 @@ export interface Conversation {
   model: string;
   temperature: number;
   maxTokens: number;
+  enabledMcpServerIds?: string[];
 }
 
 export interface ChatRequest {

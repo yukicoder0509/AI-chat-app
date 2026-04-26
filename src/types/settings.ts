@@ -21,13 +21,14 @@ export interface ApiConfig {
 }
 
 export interface UserSettings {
-  selectedModel: string;
+  selectedModel: string; // any model ID from /v1/models, OR "auto" which activates routing
   systemPrompt: string;
   apiUrl: string;
   apiKey: string;
   apiConfig: ApiConfig;
   theme: "light" | "dark" | "auto";
   autoSave: boolean;
+  memoryEnabled: boolean;
 }
 
 export interface SettingsState {
@@ -56,4 +57,5 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   apiConfig: DEFAULT_API_CONFIG,
   theme: "auto",
   autoSave: true,
+  memoryEnabled: false,
 };

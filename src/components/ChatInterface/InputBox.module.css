@@ -83,12 +83,64 @@
   to { transform: rotate(360deg); }
 }
 
-.hint {
+.hintRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 0.5rem;
+}
+
+.hint {
+  margin: 0;
   font-size: 0.7rem;
   color: var(--color-text-secondary);
-  text-align: right;
   opacity: 0.65;
+}
+
+.extractingHint {
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--color-primary);
+  opacity: 0.75;
+  font-style: italic;
+}
+
+.fileInput {
+  display: none;
+}
+
+.attachButton {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background 0.15s ease;
+  align-self: flex-end;
+  padding: 0;
+
+  &:hover:not(:disabled) {
+    color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.attachmentError {
+  margin: 0 0 6px;
+  font-size: 0.75rem;
+  color: #dc2626;
+  padding: 0 2px;
 }
 
 @media (max-width: 768px) {

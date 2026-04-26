@@ -15,12 +15,28 @@ export class ConversationStorage {
   static saveConversation(conversation: Conversation): void {
     try {
       const conversations = this.getAllConversations();
+      // Strip transient blob URLs and large base64 payloads — these are
+      // session-only data and would quickly exhaust the localStorage quota.
+      const stripped: Conversation = {
+        ...conversation,
+        messages: conversation.messages.map((m) => {
+          if (!m.attachments?.length) return m;
+          return {
+            ...m,
+            attachments: m.attachments.map(({ previewObjectUrl: _p, base64DataUrl: _b, ...meta }) => ({
+              ...meta,
+              previewObjectUrl: undefined,
+              base64DataUrl: "",
+            })),
+          };
+        }),
+      };
       const index = conversations.findIndex((c) => c.id === conversation.id);
 
       if (index >= 0) {
-        conversations[index] = conversation;
+        conversations[index] = stripped;
       } else {
-        conversations.push(conversation);
+        conversations.push(stripped);
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));

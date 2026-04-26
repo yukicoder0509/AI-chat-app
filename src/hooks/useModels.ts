@@ -18,7 +18,7 @@ export const useModels = () => {
         apiKey: settings.apiKey,
       });
       const list = await client.fetchModels();
-      setModels(list);
+      setModels(["auto", ...list]);
     } catch (e) {
       setModelsError(e instanceof Error ? e.message : "Failed to fetch models");
     } finally {

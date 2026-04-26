@@ -13,3 +13,9 @@ export type { SystemPromptEditorProps } from "./SystemPromptEditor";
 
 export { ApiParametersEditor } from "./ApiParametersEditor";
 export type { ApiParametersEditorProps } from "./ApiParametersEditor";
+
+export { McpSettings } from "./McpSettings";
+export type { McpSettingsProps } from "./McpSettings";
+
+export { RoutingRulesEditor } from "./RoutingRulesEditor";
+export type { RoutingRulesEditorProps } from "./RoutingRulesEditor";

@@ -1,0 +1,119 @@
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.8rem;
+  margin: 4px 0;
+  background: var(--color-input-bg);
+}
+
+.card.running,
+.card.pending {
+  border-color: rgba(var(--color-primary-rgb), 0.3);
+}
+
+.card.complete {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.card.error {
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  gap: 8px;
+  cursor: default;
+}
+
+.card.complete .header {
+  cursor: pointer;
+  &:hover { background: rgba(0,0,0,0.03); }
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.spinner {
+  animation: spin 0.8s linear infinite;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.iconComplete { color: #16a34a; flex-shrink: 0; }
+.iconError { color: #dc2626; flex-shrink: 0; }
+
+.toolName {
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.serverLabel {
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.statusText {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.statusError {
+  color: #dc2626;
+  font-size: 0.75rem;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toggleBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 4px;
+
+  &:hover { color: var(--color-text); }
+}
+
+.result {
+  border-top: 1px solid var(--color-border);
+  padding: 8px 10px;
+
+  pre {
+    margin: 0;
+    font-size: 0.78rem;
+    font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--color-text);
+    max-height: 200px;
+    overflow-y: auto;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
