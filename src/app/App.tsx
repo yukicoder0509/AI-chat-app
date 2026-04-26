@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useChat, useSettings, useModels, useRouting, useMemory, useTools } from "../hooks";
+import { MEMORY_SERVER_ID } from "../hooks/useMemory";
 import { ChatInterface, Sidebar, SettingsPanel, Toast, MemoryPanel } from "../components";
 import { MainLayout } from "./layout/MainLayout";
 import { useAppStore } from "./store";
 import type { Attachment } from "../types/attachments";
 import type { RoutingDecision } from "../types/routing";
-import type { OpenAITool } from "../types/openai";
 import styles from "./App.module.css";
 
 export const App = () => {
@@ -32,11 +32,23 @@ export const App = () => {
     serverId: t.serverId,
   }));
 
+  // Merge MCP tools with local memory tools.
+  const allTools = [...openAiTools, ...memory.memoryTools];
+
+  // Route tool calls: memory tools are handled locally, MCP tools go to the client.
+  const executeTool = useCallback(
+    (serverId: string, name: string, args: Record<string, unknown>) => {
+      if (serverId === MEMORY_SERVER_ID) return memory.executeMemoryTool(name, args);
+      return tools.executeTool(serverId, name, args);
+    },
+    [memory, tools],
+  );
+
   const chat = useChat({
     injectMemories: memory.injectMemories,
     extractAndStore: memory.extractAndStore,
-    availableTools: openAiTools.length > 0 ? openAiTools : undefined,
-    executeTool: tools.availableTools.length > 0 ? tools.executeTool : undefined,
+    availableTools: allTools.length > 0 ? allTools : undefined,
+    executeTool: allTools.length > 0 ? executeTool : undefined,
   });
 
   useEffect(() => {
