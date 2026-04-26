@@ -25,8 +25,12 @@ export const MessageList = ({
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingContent]);
 
-  // Hide "tool" role messages from display (they're shown via ToolCallBlock)
-  const visibleMessages = messages.filter((m) => m.role !== "tool");
+  // Hide tool results (shown via ToolCallBlock) and empty assistant placeholders
+  const visibleMessages = messages.filter((m) => {
+    if (m.role === "tool") return false;
+    if (m.role === "assistant" && !m.content && (!m.toolCalls || m.toolCalls.length === 0)) return false;
+    return true;
+  });
 
   return (
     <div className={styles.container}>
@@ -87,6 +91,21 @@ export const MessageList = ({
             </div>
           </div>
         ))}
+
+        {isStreaming && !streamingContent && (
+          <div className={`${styles.messageGroup} ${styles.assistant}`}>
+            <div className={styles.messageContent}>
+              <div className={styles.messageHeader}>
+                <span className={styles.role}>Assistant</span>
+              </div>
+              <div className={styles.thinkingDots}>
+                <span className={styles.dot} />
+                <span className={styles.dot} />
+                <span className={styles.dot} />
+              </div>
+            </div>
+          </div>
+        )}
 
         {isStreaming && streamingContent && (
           <div className={`${styles.messageGroup} ${styles.assistant}`}>
