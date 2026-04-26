@@ -14,7 +14,7 @@ export interface StreamOptions {
   onComplete?: (fullMessage: string) => void;
   onError?: (error: Error) => void;
   onStart?: () => void;
-  onToolCalls?: (calls: OpenAIToolCall[]) => void;
+  onToolCalls?: (calls: OpenAIToolCall[]) => void | Promise<void>;
   tools?: OpenAITool[];
 }
 
@@ -109,7 +109,7 @@ export async function streamChat(
         type: "function" as const,
         function: { name: acc.name, arguments: acc.argumentsRaw },
       }));
-      callbacks.onToolCalls?.(calls);
+      await callbacks.onToolCalls?.(calls);
       // Don't call onComplete here — the caller will continue with tool results
     } else {
       callbacks.onComplete?.(fullMessage);

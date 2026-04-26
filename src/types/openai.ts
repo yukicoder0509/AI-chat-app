@@ -12,7 +12,7 @@ export interface ImageContent {
   image_url: { url: string; detail?: "auto" | "low" | "high" };
 }
 
-export type MessageContent = string | Array<TextContent | ImageContent>;
+export type MessageContent = string | null | Array<TextContent | ImageContent>;
 
 export interface OpenAIToolFunction {
   name: string;

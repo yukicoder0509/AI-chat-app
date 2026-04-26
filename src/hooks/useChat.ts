@@ -129,7 +129,7 @@ export const useChat = (options: UseChatOptions = {}) => {
                   }));
                   return {
                     role: "assistant" as const,
-                    content: msg.content || "",
+                    content: msg.content || null,
                     tool_calls: openAiToolCalls,
                   };
                 }

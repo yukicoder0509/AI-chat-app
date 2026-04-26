@@ -21,14 +21,15 @@ export const App = () => {
   const tools = useTools();
   const { error, setError } = useAppStore();
 
-  // Convert McpTool[] → OpenAITool[] for the API
-  const openAiTools: OpenAITool[] = tools.availableTools.map((t) => ({
-    type: "function",
+  // Convert McpTool[] → OpenAITool[] for the API, keeping serverId so useChat can route tool calls.
+  const openAiTools = tools.availableTools.map((t) => ({
+    type: "function" as const,
     function: {
       name: t.name,
       description: t.description,
       parameters: t.inputSchema,
     },
+    serverId: t.serverId,
   }));
 
   const chat = useChat({
