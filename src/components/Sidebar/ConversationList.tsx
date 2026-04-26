@@ -39,7 +39,7 @@ export const ConversationList = ({
           <p className={styles.empty}>No conversations yet.</p>
         ) : null}
 
-        {conversations.map((conv) => {
+        {[...conversations].sort((a, b) => b.updatedAt - a.updatedAt).map((conv) => {
           const isActive = conv.id === currentConversationId;
           const preview = createMessageSummary(
             conv.messages.length > 0
