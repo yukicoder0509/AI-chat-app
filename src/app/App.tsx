@@ -3,7 +3,7 @@ import { useChat, useSettings, useModels, useRouting, useMemory, useTools } from
 import { MEMORY_SERVER_ID } from "../hooks/useMemory";
 import { ChatInterface, Sidebar, SettingsPanel, Toast, MemoryPanel } from "../components";
 import { MainLayout } from "./layout/MainLayout";
-import { useAppStore } from "./store";
+import { useAppStore, useChatStore } from "./store";
 import type { Attachment } from "../types/attachments";
 import type { RoutingDecision } from "../types/routing";
 import styles from "./App.module.css";
@@ -52,7 +52,7 @@ export const App = () => {
   });
 
   useEffect(() => {
-    if (chat.conversations.length === 0) {
+    if (useChatStore.getState().conversations.length === 0) {
       chat.startNewConversation("Welcome", settings.systemPrompt);
     }
   }, []);

@@ -26,7 +26,7 @@ export const ConversationList = ({
     <div className={styles.container}>
       <Button
         variant="primary"
-        size="large"
+        size="small"
         onClick={onNewConversation}
         className={styles.newButton}
       >
