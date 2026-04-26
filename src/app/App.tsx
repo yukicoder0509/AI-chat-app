@@ -1,52 +1,94 @@
 import { useState, useEffect, useCallback } from "react";
-import { useChat, useSettings, useModels } from "../hooks";
-import { ChatInterface, Sidebar, SettingsPanel, Toast } from "../components";
+import { useChat, useSettings, useModels, useRouting, useMemory, useTools } from "../hooks";
+import { ChatInterface, Sidebar, SettingsPanel, Toast, MemoryPanel } from "../components";
 import { MainLayout } from "./layout/MainLayout";
 import { useAppStore } from "./store";
+import type { Attachment } from "../types/attachments";
+import type { RoutingDecision } from "../types/routing";
+import type { OpenAITool } from "../types/openai";
 import styles from "./App.module.css";
 
 export const App = () => {
   const [showSettings, setShowSettings] = useState(false);
-  const chat = useChat();
+  const [showMemoryPanel, setShowMemoryPanel] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [lastRoutingDecision, setLastRoutingDecision] = useState<RoutingDecision | null>(null);
+
   const settings = useSettings();
   const { models, isLoadingModels } = useModels();
+  const routing = useRouting();
+  const memory = useMemory();
+  const tools = useTools();
   const { error, setError } = useAppStore();
 
-  // Initialize first conversation if none exists
+  // Convert McpTool[] → OpenAITool[] for the API
+  const openAiTools: OpenAITool[] = tools.availableTools.map((t) => ({
+    type: "function",
+    function: {
+      name: t.name,
+      description: t.description,
+      parameters: t.inputSchema,
+    },
+  }));
+
+  const chat = useChat({
+    injectMemories: memory.injectMemories,
+    extractAndStore: memory.extractAndStore,
+    availableTools: openAiTools.length > 0 ? openAiTools : undefined,
+    executeTool: tools.availableTools.length > 0 ? tools.executeTool : undefined,
+  });
+
   useEffect(() => {
     if (chat.conversations.length === 0) {
       chat.startNewConversation("Welcome", settings.systemPrompt);
     }
   }, []);
 
-  // Auto-select the first available model once the API responds
   useEffect(() => {
     if (models.length === 0) return;
-    if (!settings.selectedModel) {
-      settings.setSelectedModel(models[0]);
+    const realModels = models.filter((m) => m !== "auto");
+    if (!settings.selectedModel && realModels.length > 0) {
+      settings.setSelectedModel(realModels[0]);
     }
-    if (chat.currentConversation && !chat.currentConversation.model) {
+    if (chat.currentConversation && !chat.currentConversation.model && realModels.length > 0) {
       chat.updateConversationSettings(chat.currentConversation.id, {
-        model: models[0],
+        model: realModels[0],
       });
     }
   }, [models]);
 
   const handleSendMessage = useCallback(
-    async (message: string) => {
+    async (message: string, atts: Attachment[] = []) => {
       if (!chat.currentConversation || !settings.apiKey) {
         alert("Please configure your API key in settings first.");
         setShowSettings(true);
         return;
       }
 
+      const conv = chat.currentConversation;
+
+      if (conv.model === "auto") {
+        const { modelId, decision } = routing.resolveModel(
+          message,
+          atts.length > 0,
+          models,
+        );
+        setLastRoutingDecision(decision);
+        chat.updateConversationSettings(conv.id, { model: modelId });
+      }
+
       try {
-        await chat.sendMessage(message);
-      } catch (error) {
-        console.error("Error sending message:", error);
+        await chat.sendMessage(message, atts);
+        setAttachments([]);
+      } catch (err) {
+        console.error("Error sending message:", err);
+      } finally {
+        if (conv.model === "auto") {
+          chat.updateConversationSettings(conv.id, { model: "auto" });
+        }
       }
     },
-    [chat, settings.apiKey],
+    [chat, settings.apiKey, models, routing],
   );
 
   const handleNewConversation = useCallback(() => {
@@ -55,6 +97,7 @@ export const App = () => {
       day: "numeric",
     })}`;
     chat.startNewConversation(title, settings.systemPrompt);
+    setLastRoutingDecision(null);
   }, [chat, settings.systemPrompt]);
 
   const handleDeleteConversation = useCallback(
@@ -69,6 +112,7 @@ export const App = () => {
   const handleSelectConversation = useCallback(
     (id: string) => {
       chat.switchConversation(id);
+      setLastRoutingDecision(null);
     },
     [chat],
   );
@@ -77,10 +121,15 @@ export const App = () => {
     (model: string) => {
       if (chat.currentConversation) {
         chat.updateConversationSettings(chat.currentConversation.id, { model });
+        if (model !== "auto") setLastRoutingDecision(null);
       }
     },
     [chat],
   );
+
+  const connectedServersCount = tools.servers.filter(
+    (s) => s.enabled && s.status === "connected",
+  ).length;
 
   return (
     <div className={styles.app}>
@@ -104,11 +153,41 @@ export const App = () => {
             models={models}
             isLoadingModels={isLoadingModels}
             onModelChange={handleModelChange}
+            attachments={attachments}
+            onAttachmentsChange={setAttachments}
+            lastRoutingDecision={lastRoutingDecision}
+            connectedServersCount={connectedServersCount}
+            isExtractingMemory={memory.isExtracting}
           />
         }
       />
 
-      {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+      {showSettings && (
+        <SettingsPanel
+          onClose={() => setShowSettings(false)}
+          onOpenMemoryPanel={() => {
+            setShowSettings(false);
+            setShowMemoryPanel(true);
+          }}
+          mcpServers={tools.servers}
+          mcpActions={{
+            addServer: tools.addServer,
+            updateServer: tools.updateServer,
+            removeServer: tools.removeServer,
+            reconnect: tools.reconnect,
+          }}
+        />
+      )}
+
+      {showMemoryPanel && (
+        <MemoryPanel
+          memories={memory.memories}
+          onClose={() => setShowMemoryPanel(false)}
+          onUpdate={memory.updateMemory}
+          onDelete={memory.deleteMemory}
+          onClearAll={memory.clearMemories}
+        />
+      )}
 
       {error && (
         <Toast

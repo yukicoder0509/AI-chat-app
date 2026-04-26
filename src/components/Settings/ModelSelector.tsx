@@ -36,7 +36,7 @@ export const ModelSelector = ({
         ) : (
           options.map((id) => (
             <option key={id} value={id}>
-              {id}
+              {id === "auto" ? "⚡ Auto" : id}
             </option>
           ))
         )}

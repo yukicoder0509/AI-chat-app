@@ -42,6 +42,11 @@ export interface ChatState {
     content: string,
     tokens?: number,
   ) => void;
+  updateMessage: (
+    conversationId: string,
+    messageId: string,
+    updates: Partial<Message>,
+  ) => void;
 
   // Streaming actions
   startStreaming: () => void;
@@ -226,6 +231,27 @@ export const useChatStore = create<ChatState>()(
             return c;
           });
 
+          return {
+            conversations: updated,
+            currentConversation:
+              state.currentConversationId === conversationId
+                ? updated.find((c) => c.id === conversationId) || null
+                : state.currentConversation,
+          };
+        });
+      },
+
+      updateMessage: (conversationId: string, messageId: string, updates: Partial<Message>) => {
+        set((state) => {
+          const updated = state.conversations.map((c) => {
+            if (c.id !== conversationId) return c;
+            const messages = c.messages.map((m) =>
+              m.id === messageId ? { ...m, ...updates } : m,
+            );
+            const newConversation = { ...c, messages, updatedAt: Date.now() };
+            ConversationStorage.saveConversation(newConversation);
+            return newConversation;
+          });
           return {
             conversations: updated,
             currentConversation:

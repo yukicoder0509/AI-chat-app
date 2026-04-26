@@ -2,11 +2,45 @@
  * OpenAI API request and response types
  */
 
+export interface TextContent {
+  type: "text";
+  text: string;
+}
+
+export interface ImageContent {
+  type: "image_url";
+  image_url: { url: string; detail?: "auto" | "low" | "high" };
+}
+
+export type MessageContent = string | Array<TextContent | ImageContent>;
+
+export interface OpenAIToolFunction {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+}
+
+export interface OpenAITool {
+  type: "function";
+  function: OpenAIToolFunction;
+}
+
+export interface OpenAIToolCall {
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: string;
+  };
+}
+
 export interface OpenAIRequestBody {
   model: string;
   messages: Array<{
-    role: "system" | "user" | "assistant";
-    content: string;
+    role: "system" | "user" | "assistant" | "tool";
+    content: MessageContent;
+    tool_call_id?: string;
+    tool_calls?: OpenAIToolCall[];
   }>;
   temperature?: number;
   max_tokens?: number;
@@ -14,11 +48,14 @@ export interface OpenAIRequestBody {
   frequency_penalty?: number;
   presence_penalty?: number;
   stream?: boolean;
+  tools?: OpenAITool[];
+  tool_choice?: "auto" | "none" | "required";
 }
 
 export interface OpenAIMessage {
-  role: "system" | "user" | "assistant";
-  content: string;
+  role: "system" | "user" | "assistant" | "tool";
+  content: MessageContent;
+  tool_call_id?: string;
 }
 
 export interface OpenAIChoice {
@@ -42,12 +79,23 @@ export interface OpenAIResponse {
   usage?: OpenAIUsage;
 }
 
+export interface OpenAIStreamDelta {
+  role?: string;
+  content?: string;
+  tool_calls?: Array<{
+    index: number;
+    id?: string;
+    type?: "function";
+    function?: {
+      name?: string;
+      arguments?: string;
+    };
+  }>;
+}
+
 export interface OpenAIStreamChoice {
   index: number;
-  delta: {
-    role?: string;
-    content?: string;
-  };
+  delta: OpenAIStreamDelta;
   finish_reason: string | null;
 }
 
